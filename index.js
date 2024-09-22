@@ -11,6 +11,15 @@ app.get('/products/:productId', (req, res) => {
   });
 });
 
+// Маршрут GET для category
+app.get('/categories/:categoryId', (req, res) => {
+    const categoryId = req.params.categoryId;
+    res.json({
+      id: categoryId,
+      name: `${categoryId} category`
+    });
+  });
+
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
 });
