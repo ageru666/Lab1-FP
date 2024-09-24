@@ -19,6 +19,7 @@ app.get('/categories/:categoryId', (req, res) => {
       name: `${categoryId} category`
     });
   });
+  // feature
 
 app.listen(port, () => {
   console.log(`Server is running on http://localhost:${port}`);
