@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v3 
+        uses: actions/checkout@v3  
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
@@ -22,10 +22,18 @@ jobs:
           node-version: '16' 
 
       - name: Install dependencies
-        run: npm install 
+        run: npm install  
 
-      - name: Run tests 
-        run: npm test  
+      - name: Run tests and collect results
+        run: |
+          mkdir -p test-results  # Создаём папку для результатов тестов
+          npm test  # Запускаем тесты
+
+      - name: Upload test results
+        uses: actions/upload-artifact@v3  
+        with:
+          name: test-results  
+          path: test-results 
 
       - name: No build step
         run: echo "No build step necessary for this project"  
