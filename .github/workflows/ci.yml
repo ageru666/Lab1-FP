@@ -44,6 +44,10 @@ jobs:
           name: project-files
           path: .  
 
+      - name: Install SonarQube Scanner
+        run: |
+          npm install -g sonarqube-scanner
+
       - name: SonarQube Scan
         run: |
           sonar-scanner \
