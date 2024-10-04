@@ -1,0 +1,7 @@
+organization=ageru666
+projectKey=ageru666_Lab1-FP
+serverUrl=https://sonarcloud.io
+serverVersion=8.0.0.56940
+dashboardUrl=https://sonarcloud.io/dashboard?id=ageru666_Lab1-FP
+ceTaskId=AZJXaksI1eLi-5lnynDY
+ceTaskUrl=https://sonarcloud.io/api/ce/task?id=AZJXaksI1eLi-5lnynDY
