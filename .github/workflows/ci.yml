@@ -43,3 +43,11 @@ jobs:
         with:
           name: project-files
           path: .  
+
+      - name: SonarQube Scan
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=ageru666_Lab1-FP \
+            -Dsonar.sources=. \
+            -Dsonar.host.url=http://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
