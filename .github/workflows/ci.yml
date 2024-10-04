@@ -28,11 +28,11 @@ jobs:
         uses: actions/setup-java@v3
         with:
           java-version: '17'
-          distribution: 'temurin'  
+          distribution: 'temurin' 
 
       - name: Run tests and collect results
         run: |
-          mkdir -p test-results  
+          mkdir -p test-results 
           npm test  
 
       - name: Upload test results
@@ -46,10 +46,7 @@ jobs:
         env:
           SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
           SONAR_HOST_URL: 'https://sonarcloud.io'
-        with:
-          projectKey: "ageru666_Lab1-FP"
-          organization: "ageru666"
-          
+
       - name: No build step
         run: echo "No build step necessary for this project"  
 
