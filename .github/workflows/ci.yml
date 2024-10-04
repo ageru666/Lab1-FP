@@ -44,9 +44,15 @@ jobs:
           name: test-results  
           path: test-results 
 
+      - name: Install SonarScanner  
+        run: |
+          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
+          unzip sonar-scanner-cli.zip
+          mv sonar-scanner-4.6.2.2472-linux sonar-scanner
+
       - name: SonarQube Scan  
         run: |
-          sonar-scanner \
+          ./sonar-scanner/bin/sonar-scanner \
             -Dsonar.projectKey=ageru666_Lab1-FP \
             -Dsonar.organization=ageru666 \
             -Dsonar.host.url=https://sonarcloud.io \
