@@ -44,19 +44,15 @@ jobs:
           name: test-results  
           path: test-results 
 
-      - name: Install SonarScanner  
-        run: |
-          curl -sSLo sonar-scanner-cli.zip https://binaries.sonarsource.com/Distribution/sonar-scanner-cli/sonar-scanner-cli-4.6.2.2472-linux.zip
-          unzip sonar-scanner-cli.zip
-          mv sonar-scanner-4.6.2.2472-linux sonar-scanner
-
       - name: SonarQube Scan  
-        run: |
-          ./sonar-scanner/bin/sonar-scanner \
-            -Dsonar.projectKey=ageru666_Lab1-FP \
-            -Dsonar.organization=ageru666 \
-            -Dsonar.host.url=https://sonarcloud.io \
-            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
+        uses: SonarSource/sonarqube-scan-action@v1.0.0
+        env:
+          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+          SONAR_HOST_URL: 'https://sonarcloud.io'
+        with:
+          args: |
+            -Dsonar.projectKey=ageru666_Lab1-FP
+            -Dsonar.organization=ageru666
 
       - name: No build step
         run: echo "No build step necessary for this project"  
@@ -65,4 +61,4 @@ jobs:
         uses: actions/upload-artifact@v3  
         with:
           name: project-files
-          path: .  
+          path: .
