@@ -19,10 +19,10 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' 
+          node-version: '16'
 
       - name: Install dependencies
-        run: npm install  
+        run: npm install
 
       - name: Set up Java 17  
         uses: actions/setup-java@v3
@@ -36,27 +36,32 @@ jobs:
       - name: Run tests and collect results
         run: |
           mkdir -p test-results  
-          npm test 
+          npm test
 
       - name: Upload test results
         uses: actions/upload-artifact@v3  
         with:
           name: test-results  
-          path: test-results 
+          path: test-results
 
-      - name: SonarQube Scan  
-        uses: SonarSource/sonarqube-scan-action@v1.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
-          SONAR_HOST_URL: 'https://sonarcloud.io'
+      - name: Set up SonarCloud CLI  
+        uses: SonarSource/sonarcloud-github-action@master
         with:
-          args: "-Dsonar.projectKey=ageru666_Lab1-FP -Dsonar.organization=ageru666"
+          token: ${{ secrets.SONAR_TOKEN }}
+
+      - name: SonarScanner CLI  
+        run: |
+          sonar-scanner \
+            -Dsonar.projectKey=ageru666_Lab1-FP \
+            -Dsonar.organization=ageru666 \
+            -Dsonar.host.url=https://sonarcloud.io \
+            -Dsonar.login=${{ secrets.SONAR_TOKEN }}
 
       - name: No build step
-        run: echo "No build step necessary for this project"  
+        run: echo "No build step necessary for this project"
 
       - name: Upload artifact
         uses: actions/upload-artifact@v3  
         with:
           name: project-files
-          path: .  
+          path: .
