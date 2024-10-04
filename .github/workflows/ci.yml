@@ -30,10 +30,13 @@ jobs:
           java-version: '17'
           distribution: 'temurin'
 
+      - name: Verify Java version  
+        run: java -version
+
       - name: Run tests and collect results
         run: |
           mkdir -p test-results  
-          npm test  
+          npm test 
 
       - name: Upload test results
         uses: actions/upload-artifact@v3  
