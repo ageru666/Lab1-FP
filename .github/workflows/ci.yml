@@ -26,7 +26,7 @@ jobs:
 
       - name: Run tests and collect results
         run: |
-          mkdir -p test-results  
+          mkdir -p test-results 
           npm test  
 
       - name: Upload test results
@@ -42,14 +42,4 @@ jobs:
         uses: actions/upload-artifact@v3  
         with:
           name: project-files
-          path: .
-
-     
-      - name: SonarQube Scan  
-        uses: SonarSource/sonarqube-scan-action@v1.0.0
-        env:
-          SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}  
-          SONAR_HOST_URL: 'https://sonarcloud.io'
-        with:
-          projectKey: "ageru666_Lab1-FP"  
-          organization: "ageru666"  
+          path: .  
