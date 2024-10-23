@@ -2,6 +2,7 @@ require('dotenv').config();
 require('newrelic');
 
 const express = require('express');
+const axios = require('axios');  
 const { MongoClient, ObjectId } = require('mongodb'); 
 const app = express();
 const port = 8080;
@@ -48,22 +49,21 @@ async function main() {
 
     // Отримати продукт за ID
     app.get('/products/:productId', async (req, res) => {
-    const productId = req.params.productId;
+      const productId = req.params.productId;
 
-    // Перевірка, чи є productId допустимим ObjectId
-    if (!ObjectId.isValid(productId)) {
-      return res.status(400).send('Неправильний формат productId');
-    }
+      // Перевірка, чи є productId допустимим ObjectId
+      if (!ObjectId.isValid(productId)) {
+        return res.status(400).send('Неправильний формат productId');
+      }
 
-    const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
+      const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
 
-    if (!product) {
-      return res.status(404).send('Продукт не знайдено');
-    }
+      if (!product) {
+        return res.status(404).send('Продукт не знайдено');
+      }
 
-    res.json(product);
-});
-
+      res.json(product);
+    });
 
     // Отримати категорію за ID
     app.get('/categories/:categoryId', (req, res) => {
@@ -72,6 +72,17 @@ async function main() {
         id: categoryId,
         name: `${categoryId} category`
       });
+    });
+
+    // Новий ендпоінт для отримання даних із зовнішнього API
+    app.get('/external-api', async (req, res) => {
+      try {
+        const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
+        res.json(response.data); 
+      } catch (error) {
+        console.error('Помилка при запиті до зовнішнього API:', error);
+        res.status(500).json({ message: 'Помилка при запиті до зовнішнього API' });
+      }
     });
 
     // Запуск сервера
