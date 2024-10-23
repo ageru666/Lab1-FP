@@ -1,6 +1,24 @@
+require('newrelic');
 const express = require('express');
 const app = express();
-const port = 3000;
+const port = 8080;
+
+const client = require('prom-client');
+
+const register = new client.Registry();
+
+client.collectDefaultMetrics({ register });
+
+// Маршрут для збору метрик Prometheus
+app.get('/metrics', async (req, res) => {
+  res.set('Content-Type', register.contentType);
+  res.end(await register.metrics());
+});
+
+// Маршрут для кореневої сторінки
+app.get('/', (req, res) => {
+  res.send('Hello, World!');
+});
 
 // Маршрут GET для products
 app.get('/products/:productId', (req, res) => {

@@ -2,3 +2,4 @@ node_modules/
 sonar-project.properties
 .scannerwork/
 test-results/
+.env
