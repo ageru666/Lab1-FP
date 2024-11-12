@@ -24,10 +24,11 @@ jobs:
       - name: Install dependencies
         run: npm install  
 
-      - name: Install k6
+      - name: Download and install k6
         run: |
-          curl -s https://packagecloud.io/install/repositories/grafana/stable/script.deb.sh | sudo bash
-          sudo apt-get install k6
+          curl -L https://github.com/grafana/k6/releases/download/v0.43.1/k6-v0.43.1-linux-amd64.tar.gz -o k6.tar.gz
+          tar -xvf k6.tar.gz
+          sudo mv k6-v0.43.1-linux-amd64/k6 /usr/local/bin/
 
       - name: Run k6 tests
         env:
