@@ -24,21 +24,27 @@ jobs:
       - name: Install dependencies
         run: npm install  
 
-      - name: Run tests and collect results
+      - name: Run unit tests and collect results
         run: |
           mkdir -p test-results 
           npm test  
 
-      - name: Upload test results
+      - name: Upload unit test results
         uses: actions/upload-artifact@v3  
         with:
-          name: test-results  
+          name: unit-test-results  
           path: test-results 
 
-      - name: No build step
-        run: echo "No build step necessary for this project"  
+      - name: Run k6 performance tests
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+        run: |
+          npm install -g k6
+          k6 cloud test/ramping_vus_test.js
+          k6 cloud test/constant_vus_test.js
+          k6 cloud test/constant_arrival_rate_test.js
 
-      - name: Upload artifact
+      - name: Upload project files as artifact
         uses: actions/upload-artifact@v3  
         with:
           name: project-files
@@ -56,5 +62,3 @@ jobs:
             -Dsonar.sources=. \
             -Dsonar.host.url=http://sonarcloud.io \
             -Dsonar.login=${{ secrets.SONAR_TOKEN }}
-
-# test
