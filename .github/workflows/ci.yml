@@ -32,12 +32,11 @@ jobs:
 
       - name: Run k6 tests
         env:
-        K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
         run: |
           k6 cloud --project 3723776 test/ramping_vus_test.js
           k6 cloud --project 3723776 test/constant_vus_test.js
           k6 cloud --project 3723776 test/constant_arrival_rate_test.js
-
 
       - name: Run Node.js tests and collect results
         run: |
