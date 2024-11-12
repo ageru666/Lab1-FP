@@ -33,6 +33,7 @@ jobs:
       - name: Run k6 tests
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
         run: |
           k6 cloud test/constant_arrival_rate_test.js
           k6 cloud test/constant_vus_test.js
