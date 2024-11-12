@@ -30,7 +30,7 @@ jobs:
           tar -xvf k6.tar.gz
           sudo mv k6-v0.43.1-linux-amd64/k6 /usr/local/bin/
 
-       - name: Run k6 tests
+      - name: Run k6 tests
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
         run: |
