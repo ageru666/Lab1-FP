@@ -26,17 +26,24 @@ jobs:
 
       - name: Start local server
         run: |
-          node index.js &
+          node index.js > server.log 2>&1 &
         env:
-          PORT: 8080 
+          PORT: 8080
 
       - name: Wait for server to be ready
         run: |
-          for i in {1..20}; do
+          for i in {1..30}; do
             curl -s http://localhost:8080/external-api/ && break
             echo "Waiting for server..."
-            sleep 10
+            sleep 5
           done
+
+      - name: Test server availability
+        run: curl -v http://localhost:8080/external-api/
+
+      - name: Show server logs
+        if: failure()
+        run: cat server.log
 
       - name: Download and install k6
         run: |
