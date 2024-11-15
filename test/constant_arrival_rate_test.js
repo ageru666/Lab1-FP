@@ -15,6 +15,6 @@ export const options = {
 };
 
 export default function () {
-    http.get('http://localhost:8080/external-api');
+    http.get('http://localhost:8080/external-api/');
     sleep(Math.random() * 3 + 1);
 }

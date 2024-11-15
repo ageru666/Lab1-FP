@@ -59,6 +59,13 @@ jobs:
           tar -xvf k6.tar.gz
           sudo mv k6-v0.43.1-linux-amd64/k6 /usr/local/bin/
 
+      - name: Run k6 constant arrival rate test and save results
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
+        run: |
+          k6 run --out json=constant_arrival_rate_test_result.json test/constant_arrival_rate_test.js
+
       - name: Run k6 constant VUs test and save results
         env:
           K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
@@ -66,12 +73,21 @@ jobs:
         run: |
           k6 run --out json=constant_vus_test_result.json test/constant_vus_test.js
 
+      - name: Run k6 ramping VUs test and save results
+        env:
+          K6_CLOUD_TOKEN: ${{ secrets.K6_CLOUD_TOKEN }}
+          K6_CLOUD_PROJECT_ID: ${{ secrets.K6_CLOUD_PROJECT_ID }}
+        run: |
+          k6 run --out json=ramping_vus_test_result.json test/ramping_vus_test.js
+
       - name: Upload k6 test results as artifacts
         uses: actions/upload-artifact@v3
         with:
           name: k6-test-results
           path: |
+            constant_arrival_rate_test_result.json
             constant_vus_test_result.json
+            ramping_vus_test_result.json
           
       - name: Run Node.js tests and collect results
         run: |
