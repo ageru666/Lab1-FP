@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18' 
+          node-version: '18'  
 
       - name: Install dependencies
         run: npm install  
@@ -36,8 +36,11 @@ jobs:
           for i in {1..20}; do
             curl -s http://localhost:8080/external-api/ && break
             echo "Waiting for server..."
-            sleep 10
+            sleep 15
           done
+
+      - name: Show server logs 
+        run: cat server.log
 
       - name: Download and install k6
         run: |
@@ -58,7 +61,7 @@ jobs:
           name: k6-test-results
           path: |
             constant_vus_test_result.json
-
+          
       - name: Run Node.js tests and collect results
         run: |
           mkdir -p test-results 
