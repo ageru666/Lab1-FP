@@ -34,7 +34,7 @@ jobs:
       - name: Wait for server to be ready
         run: |
           for i in {1..20}; do
-            curl -s http://localhost:8080/external-api/ && break
+            curl -s http://localhost:8080/products/ && break
             echo "Waiting for server..."
             sleep 15
           done
