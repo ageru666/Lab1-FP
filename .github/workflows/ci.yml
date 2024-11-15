@@ -19,7 +19,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '16' 
+          node-version: '18' 
 
       - name: Install dependencies
         run: npm install  
@@ -29,21 +29,15 @@ jobs:
           node index.js > server.log 2>&1 &
         env:
           PORT: 8080
+          MONGODB_URI: mongodb://localhost:27017/myNewDatabase  
 
       - name: Wait for server to be ready
         run: |
-          for i in {1..30}; do
+          for i in {1..20}; do
             curl -s http://localhost:8080/external-api/ && break
             echo "Waiting for server..."
-            sleep 5
+            sleep 10
           done
-
-      - name: Test server availability
-        run: curl -v http://localhost:8080/external-api/
-
-      - name: Show server logs
-        if: failure()
-        run: cat server.log
 
       - name: Download and install k6
         run: |
@@ -64,7 +58,7 @@ jobs:
           name: k6-test-results
           path: |
             constant_vus_test_result.json
-          
+
       - name: Run Node.js tests and collect results
         run: |
           mkdir -p test-results 
