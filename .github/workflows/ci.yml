@@ -12,6 +12,17 @@ jobs:
   build:
     runs-on: ubuntu-latest  
 
+    services:
+      mongo:
+        image: mongo:latest
+        ports:
+          - 27017:27017
+        options: >-
+          --health-cmd "mongosh --eval 'db.runCommand({ connectionStatus: 1 })'"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3  
@@ -19,7 +30,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
-          node-version: '18'  
+          node-version: '18'
 
       - name: Install dependencies
         run: npm install  
@@ -29,17 +40,17 @@ jobs:
           node index.js > server.log 2>&1 &
         env:
           PORT: 8080
-          MONGODB_URI: mongodb://localhost:27017/myNewDatabase  
+          MONGODB_URI: mongodb://localhost:27017/myNewDatabase
 
       - name: Wait for server to be ready
         run: |
           for i in {1..20}; do
-            curl -s http://localhost:8080/products/ && break
+            curl -s http://localhost:8080/external-api/ && break
             echo "Waiting for server..."
-            sleep 15
+            sleep 10
           done
 
-      - name: Show server logs 
+      - name: Show server logs
         run: cat server.log
 
       - name: Download and install k6

@@ -8,6 +8,6 @@ export const options = {
 };
 
 export default function () {
-    http.get('http://localhost:8080/products/');
+    http.get('http://localhost:8080/external-api/');
     sleep(Math.random() * 3 + 1);
 }
