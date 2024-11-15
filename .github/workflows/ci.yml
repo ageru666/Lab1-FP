@@ -26,9 +26,9 @@ jobs:
 
       - name: Start local server
         run: |
-          npm start &
+          node index.js &
         env:
-          PORT: 8080 
+          PORT: 8080 # Переконайтеся, що ваш сервер використовує цей порт
 
       - name: Wait for server to be ready
         run: |
