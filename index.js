@@ -4,22 +4,69 @@ require('newrelic');
 const express = require('express');
 const axios = require('axios');  
 const { MongoClient, ObjectId } = require('mongodb'); 
-const app = express();
-const port = 8080;
+const redis = require('redis'); // Додаємо Redis
+const compression = require('compression'); // Для стиснення відповідей
+const client = require('prom-client'); // Для метрик Prometheus
 
-const client = require('prom-client');
+const app = express();
+const port = process.env.PORT || 8080;
+
+// Prometheus: налаштування метрик
 const register = new client.Registry();
 client.collectDefaultMetrics({ register });
+
+const responseTime = new client.Histogram({
+  name: 'response_time_seconds',
+  help: 'Час відповіді на запит у секундах',
+  labelNames: ['method', 'route', 'status_code'],
+  buckets: [0.1, 0.5, 1, 3, 5]
+});
+register.registerMetric(responseTime);
+
+app.use((req, res, next) => {
+  const end = responseTime.startTimer();
+  res.on('finish', () => {
+    end({ method: req.method, route: req.originalUrl, status_code: res.statusCode });
+  });
+  next();
+});
+
+// Підключення до Redis
+const redisClient = redis.createClient();
+
+redisClient.on('connect', () => {
+  console.log('Підключено до Redis');
+});
+
+redisClient.on('error', (err) => {
+  console.error('Помилка Redis:', err);
+});
+
+// Гарантуємо, що Redis підключено
+async function connectRedis() {
+  try {
+    if (!redisClient.isOpen) {
+      await redisClient.connect();
+    }
+  } catch (err) {
+    console.error('Помилка підключення до Redis:', err);
+  }
+}
 
 const url = process.env.MONGODB_URI; 
 const mongoClient = new MongoClient(url);
 
 const dbName = 'myNewDatabase';
 
+app.use(compression()); 
+
+app.use('/static', express.static('public')); // Усі файли з папки `public` будуть доступні за URL `/static`
+
+
 async function main() {
   try {
     await mongoClient.connect();
-    console.log('Підключено до MongoDB сервера');
+    console.log('Підключено до сервера MongoDB');
     const db = mongoClient.db(dbName);
     const productsCollection = db.collection('products');
 
@@ -31,63 +78,67 @@ async function main() {
 
     // Кореневий маршрут
     app.get('/', (req, res) => {
-      res.send('Hello, World!');
+      res.send('Привіт, Світ!');
     });
 
-    // Отримати всі продукти
-    app.get('/products', async (req, res) => {
-      const products = await productsCollection.find({}).toArray();
-      res.json(products);
-    });
-
-    // Додати новий продукт
-    app.post('/products', express.json(), async (req, res) => {
-      const newProduct = req.body;
-      const result = await productsCollection.insertOne(newProduct);
-      res.json(result);
-    });
-
-    // Отримати продукт за ID
     app.get('/products/:productId', async (req, res) => {
+      const start = Date.now(); // Початок вимірювання часу
       const productId = req.params.productId;
-
-      // Перевірка, чи є productId допустимим ObjectId
+    
       if (!ObjectId.isValid(productId)) {
         return res.status(400).send('Неправильний формат productId');
       }
-
-      const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
-
-      if (!product) {
-        return res.status(404).send('Продукт не знайдено');
+    
+      try {
+        await connectRedis(); // Гарантуємо, що Redis підключено
+    
+        // Перевірка кешу в Redis
+        const cachedProduct = await redisClient.get(productId);
+        if (cachedProduct) {
+          // Оновлюємо TTI (продлеваем TTL при каждом доступе)
+          await redisClient.expire(productId, 3600); // Устанавливаем новый TTL = 3600 секунд
+          console.log(`TTI оновлено для продукту ${productId}`);
+          const duration = Date.now() - start; // Час відповіді
+          console.log(`Дані взяті з Redis для продукту ${productId}`);
+          console.log(`Час відповіді: ${duration} мс`);
+          return res.json(JSON.parse(cachedProduct)); // Розпарсені дані з кешу
+        }
+    
+        // Якщо в Redis даних немає, звертаємося до MongoDB
+        const product = await productsCollection.findOne({ _id: new ObjectId(productId) });
+        if (!product) {
+          return res.status(404).send('Продукт не знайдено');
+        }
+    
+        // Зберігаємо дані у Redis
+        await redisClient.setEx(productId, 3600, JSON.stringify(product)); // TTL = 3600 секунд
+        console.log(`Дані додані до Redis для продукту ${productId}`);
+        const duration = Date.now() - start; // Час відповіді
+        console.log(`Час відповіді: ${duration} мс`);
+        res.json(product);
+      } catch (err) {
+        console.error('Помилка:', err);
+        res.status(500).send('Внутрішня помилка сервера');
       }
-
-      res.json(product);
     });
+    
 
     // Отримати категорію за ID
     app.get('/categories/:categoryId', (req, res) => {
       const categoryId = req.params.categoryId;
       res.json({
         id: categoryId,
-        name: `${categoryId} category`
+        name: `${categoryId} категорія`
       });
     });
 
-    // Новий ендпоінт для отримання даних із зовнішнього API
-    app.get('/external-api', async (req, res) => {
-      try {
-        const response = await axios.get('https://jsonplaceholder.typicode.com/todos/1');
-        res.json(response.data); 
-      } catch (error) {
-        console.error('Помилка при запиті до зовнішнього API:', error);
-        res.status(500).json({ message: 'Помилка при запиті до зовнішнього API' });
-      }
+    app.get('/static-file', (req, res) => {
+      res.sendFile(__dirname + '/public/image.jpg'); // Відправляємо конкретний файл із папки
     });
 
     // Запуск сервера
     app.listen(port, () => {
-      console.log(`Server is running on http://localhost:${port}`);
+      console.log(`Сервер запущено за адресою http://localhost:${port}`);
     });
   } catch (error) {
     console.error(error);
